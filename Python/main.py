@@ -1,8 +1,9 @@
 import serial
+import time
 from pynput.keyboard import Controller, Key
 
 # Initialize serial communication with the HC-06
-bluetooth_port = 'COM3'  # Replace with your HC-06 COM port
+bluetooth_port = 'COM5'  # Replace with your HC-06 COM port
 baud_rate = 9600
 
 # Keyboard controller
@@ -22,14 +23,31 @@ def main():
                         print(f"Received: {data}")
                         
                         # Interpret and emulate keyboard actions
-                        if data == "Hand Raised":
-                            print("Pressing UP arrow key")
+                        if data == 'UP':
+                            print("Pressing UP arrow key") 
                             keyboard.press(Key.up)
                             keyboard.release(Key.up)
-                        elif data == "Hand Lowered":
+                        
+                        elif data == 'DOWN':
                             print("Pressing DOWN arrow key")
                             keyboard.press(Key.down)
                             keyboard.release(Key.down)
+                        
+                        elif data == 'LEFT':
+                            print("Pressing LEFT arrow key")
+                            keyboard.press(Key.left)
+                            time.sleep(0.2)
+                            keyboard.release(Key.left)
+                        elif data == 'RIGHT':
+                            print("Pressing RIGHT arrow key")
+                            keyboard.press(Key.right)
+                            time.sleep(0.2)
+                            keyboard.release(Key.right)
+
+                        elif data == 'TWIST':
+                            print("Pressing TWIST arrow key")
+                            keyboard.press(Key.backspace)
+                            keyboard.release(Key.backspace)
                         else:
                             print(f"Unrecognized data: {data}")
                     except UnicodeDecodeError as e:
