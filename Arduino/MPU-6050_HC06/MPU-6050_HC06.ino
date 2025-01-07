@@ -9,8 +9,17 @@ Adafruit_MPU6050 mpu;
 // Define SoftwareSerial pins
 SoftwareSerial bluetoothSerial(10, 11); // RX, TX pins
 
-float prev_ax = 0, prev_ay = 0, prev_az = 0;
-float threshold = 2.0; // Acceleration change threshold for gesture detection
+// Thresholds for gesture detection
+const float accelThreshold = 2.0;   // Acceleration change threshold (m/s^2)
+const float gyroThreshold = 50.0;  // Gyroscope Z-axis threshold (°/s)
+const unsigned long gestureCooldown = 2000; // Minimum delay between gesture detections (ms)
+
+// Previous sensor readings
+float prevAx = 0, prevAy = 0, prevAz = 0;
+float prevGz = 0;
+
+// Timing for gesture cooldown
+unsigned long lastGestureTime = 0;
 
 void setup() {
   // Initialize Serial for debugging
@@ -18,46 +27,72 @@ void setup() {
 
   // Initialize Bluetooth Serial
   bluetoothSerial.begin(9600); // HC-06 default baud rate
-  Serial.println("Bluetooth Module initialized!");
 
-  Serial.println("Adafruit MPU6050 test!");
-
-  // Try to initialize MPU6050
+  // Initialize MPU6050 sensor
   if (!mpu.begin()) {
-    Serial.println("Failed to find MPU6050 chip");
+    Serial.println("Failed to initialize MPU6050! Check connections.");
     while (1) {
-      delay(10);
+      delay(1000); // Indicate failure
     }
   }
-  Serial.println("MPU6050 Found!");
 
   // Configure MPU6050 ranges
   mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
   mpu.setGyroRange(MPU6050_RANGE_500_DEG);
   mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
 
-  Serial.println("MPU6050 Initialized and configured.");
+  Serial.println("MPU6050 Initialized");
 }
 
 void loop() {
+  // Get sensor events
   sensors_event_t a, g, temp;
   mpu.getEvent(&a, &g, &temp);
 
-  // Gesture detection logic
-  if (abs(a.acceleration.y - prev_ay) > threshold) {
-    if (a.acceleration.y > prev_ay) {
-      Serial.println("Hand Raised");
-      bluetoothSerial.println("UP"); // Send "UP" to Bluetooth
-    } else {
-      Serial.println("Hand Lowered");
-      bluetoothSerial.println("DOWN"); // Send "DOWN" to Bluetooth
+  unsigned long currentTime = millis();
+
+  // UP and DOWN detection using Y-axis acceleration
+  if (abs(a.acceleration.y - prevAy) > accelThreshold) {
+    if (currentTime - lastGestureTime >= gestureCooldown) {
+      if (a.acceleration.y > prevAy) {
+        Serial.println("DOWN");
+        bluetoothSerial.println("DOWN");
+      } else {
+        Serial.println("UP");
+        bluetoothSerial.println("UP");
+      }
+      lastGestureTime = currentTime; // Reset cooldown
     }
   }
 
-  // Store current acceleration for comparison in the next loop
-  prev_ax = a.acceleration.x;
-  prev_ay = a.acceleration.y;
-  prev_az = a.acceleration.z;
+  // RIGHT and LEFT detection using X-axis acceleration
+  if (abs(a.acceleration.x - prevAx) > accelThreshold) {
+    if (currentTime - lastGestureTime >= gestureCooldown) {
+      if (a.acceleration.x > prevAx) {
+        Serial.println("RIGHT");
+        bluetoothSerial.println("RIGHT");
+      } else {
+        Serial.println("LEFT");
+        bluetoothSerial.println("LEFT");
+      }
+      lastGestureTime = currentTime; // Reset cooldown
+    }
+  }
 
-  delay(200); // Adjust for gesture timing
+  // HAND TWIST detection using Z-axis gyroscope
+  if (abs(g.gyro.z - prevGz) > gyroThreshold) {
+    if (currentTime - lastGestureTime >= gestureCooldown) {
+      Serial.println("TWIST");
+      bluetoothSerial.println("TWIST");
+      lastGestureTime = currentTime; // Reset cooldown
+    }
+  }
+
+  // Store current sensor values for comparison in the next loop
+  prevAx = a.acceleration.x;
+  prevAy = a.acceleration.y;
+  prevAz = a.acceleration.z;
+  prevGz = g.gyro.z;
+
+  delay(50); // Short delay for loop stability (adjustable)
 }
