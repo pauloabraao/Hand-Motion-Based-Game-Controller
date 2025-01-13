@@ -10,9 +10,9 @@ Adafruit_MPU6050 mpu;
 SoftwareSerial bluetoothSerial(10, 11); // RX, TX pins
 
 // Thresholds for gesture detection
-const float accelThreshold = 2.0;   // Acceleration change threshold (m/s^2)
+const float accelThreshold = 3.0;   // Acceleration change threshold (m/s^2)
 const float gyroThreshold = 50.0;  // Gyroscope Z-axis threshold (°/s)
-const unsigned long gestureCooldown = 2000; // Minimum delay between gesture detections (ms)
+const unsigned long gestureCooldown = 100; // Minimum delay between gesture detections (ms)
 
 // Previous sensor readings
 float prevAx = 0, prevAy = 0, prevAz = 0;
@@ -37,11 +37,11 @@ void setup() {
   }
 
   // Configure MPU6050 ranges
-  mpu.setAccelerometerRange(MPU6050_RANGE_8_G);
+  mpu.setAccelerometerRange(MPU6050_RANGE_2_G);
   mpu.setGyroRange(MPU6050_RANGE_500_DEG);
   mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
 
-  Serial.println("MPU6050 Initialized");
+  //Serial.println("MPU6050 Initialized");
 }
 
 void loop() {
@@ -79,20 +79,20 @@ void loop() {
     }
   }
 
-  // HAND TWIST detection using Z-axis gyroscope
-  if (abs(g.gyro.z - prevGz) > gyroThreshold) {
-    if (currentTime - lastGestureTime >= gestureCooldown) {
-      Serial.println("TWIST");
-      bluetoothSerial.println("TWIST");
-      lastGestureTime = currentTime; // Reset cooldown
-    }
-  }
+  // // HAND TWIST detection using Z-axis gyroscope
+  // if (abs(g.gyro.z - prevGz) > gyroThreshold) {
+  //   if (currentTime - lastGestureTime >= gestureCooldown) {
+  //     Serial.println("TWIST");
+  //     bluetoothSerial.println("TWIST");
+  //     lastGestureTime = currentTime; // Reset cooldown
+  //   }
+  // }
 
   // Store current sensor values for comparison in the next loop
   prevAx = a.acceleration.x;
   prevAy = a.acceleration.y;
   prevAz = a.acceleration.z;
-  prevGz = g.gyro.z;
+  //prevGz = g.gyro.z;
 
   delay(50); // Short delay for loop stability (adjustable)
 }

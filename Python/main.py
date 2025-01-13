@@ -20,32 +20,30 @@ def main():
                     try:
                         # Attempt to decode incoming data
                         data = ser.readline().decode('utf-8', errors='ignore').strip()
-                        print(f"Received: {data}")
+                        #print(f"Received: {data}")
                         
                         # Interpret and emulate keyboard actions
-                        if data == 'UP':
-                            print("Pressing UP arrow key") 
+                        if data == 'U':
+                            #print("Pressing UP arrow key") 
                             keyboard.press(Key.up)
                             keyboard.release(Key.up)
                         
-                        elif data == 'DOWN':
-                            print("Pressing DOWN arrow key")
+                        elif data == 'D':
+                            #print("Pressing DOWN arrow key")
                             keyboard.press(Key.down)
                             keyboard.release(Key.down)
                         
-                        elif data == 'LEFT':
-                            print("Pressing LEFT arrow key")
+                        elif data == 'L':
+                            #print("Pressing LEFT arrow key")
                             keyboard.press(Key.left)
-                            time.sleep(0.2)
                             keyboard.release(Key.left)
-                        elif data == 'RIGHT':
-                            print("Pressing RIGHT arrow key")
+                        elif data == 'R':
+                            #print("Pressing RIGHT arrow key")
                             keyboard.press(Key.right)
-                            time.sleep(0.2)
                             keyboard.release(Key.right)
 
                         elif data == 'TWIST':
-                            print("Pressing TWIST arrow key")
+                            #print("Pressing TWIST arrow key")
                             keyboard.press(Key.backspace)
                             keyboard.release(Key.backspace)
                         else:
