@@ -40,7 +40,7 @@ void setup() {
   mpu.setGyroRange(MPU6050_RANGE_500_DEG);
   mpu.setFilterBandwidth(MPU6050_BAND_5_HZ);
 
-  // Run calibration during setup
+  // Calibration during setup
   calibrateThresholds();
 }
 
